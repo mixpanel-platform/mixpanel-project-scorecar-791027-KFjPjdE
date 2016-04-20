@@ -11,5 +11,68 @@
     <script>
       // Run queries and display results here
     </script>
+    
+    
+    
+<script type="text/cq" id="cq">
+function main() {
+  return Events({
+    from_date: '2016-02-01',
+    to_date:   '2016-04-19'
+  })
+  .filter(function(event){
+    return event.name == 'Script Complete' && event.properties["Latest Churn Date"] != null;
+  })
+  .groupByUser(function(state, events) {
+    state = state || {
+      'latest_churn_date':0, 
+      'script_complete_time_churn': null,
+      'time_difference': 0,
+      'churn_dates':[],
+      'event_lst': {} 
+    };
+    if(events.length > 0){
+      // For all script complete events, find the latest churn date 
+      for(var i = 0; i < events.length; i++){
+        state.churn_dates.push(new Date(events[i].properties['Latest Churn Date']).getTime()/1000);
+        if(new Date(events[i].properties['Latest Churn Date']).getTime()/1000 > state.latest_churn_date){
+          state.latest_churn_date = new Date(events[i].properties['Latest Churn Date']).getTime()/1000;
+        }
+        var ourEvent = events[i];
+        state.event_lst[events[i].time/1000] = JSON.stringify(events[i].properties);
+      }
+      // For all events, find the project analysis that most closely matches to recent churn 
+     for(key in state.event_lst) {
+        // If the difference between latest churn date and event timestamp is within 4 days...
+        if(Math.abs(state.latest_churn_date - key) < 345600){
+          if(state.script_complete_time_churn == null){
+            state.script_complete_time_churn = key;
+            state.time_difference = Math.abs(state.latest_churn_date - key);
+          }
+          else{
+            if(Math.abs(state.latest_churn_date - key) < state.script_complete_time_churn){
+              state.script_complete_time_churn = key;
+              state.time_difference = Math.abs(state.latest_churn_date - key);
+            }
+          }
+        }
+      }
+    }
+    return state;
+  })
+  .filter(function(item){
+    return item.value.script_complete_time_churn != null;
+  })
+  .map(function(item) {
+    // TODO: want to calculate time to churn here
+    returnItem = {};
+    returnItem["Project ID"] =item.key[0];
+    returnItem.time_difference = item.value.time_difference;
+    // Add all script complete event properties at time of churn (within 4 days )
+    returnItem["Project Properties"] = JSON.parse(item.value.event_lst[item.value.script_complete_time_churn]);
+    return returnItem;
+  });
+}
+</script>
   </body>
 </html>
