@@ -12,7 +12,7 @@
     <script>
     var script = $('#cq').html();
     function runQuery() {
-      MP.api.jql(script, null).done(function(results) {
+      MP.api.jql(script, "").done(function(results) {
         console.log(results);
       });
     }
