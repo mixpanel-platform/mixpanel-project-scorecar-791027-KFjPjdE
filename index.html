@@ -9,18 +9,6 @@
   <body class="mixpanel-platform-body">
     <h1>Hello, World!</h1>
     
-    <script>
-    var script = $('#cq').html();
-    alert(script);
-    function runQuery() {
-      MP.api.jql(script).done(function(results) {
-        console.log(results);
-      });
-    }
-    runQuery();
-    </script>
-    
-    
     
 <script type="text/cq" id="cq">
 function main() {
@@ -82,5 +70,18 @@ function main() {
   });
 }
 </script>
+
+<script>
+var script = $('#cq').html();
+alert(script);
+function runQuery() {
+  MP.api.jql(script).done(function(results) {
+    console.log(results);
+  });
+}
+runQuery();
+</script>
+
+
   </body>
 </html>
