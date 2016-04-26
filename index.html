@@ -17,9 +17,11 @@ function main() {
     from_date: '2016-02-01',
     to_date:   '2016-04-19'
   })
+  // Filter to "Script Complete" events that have a lastest churn date
   .filter(function(event){
     return event.name == 'Script Complete' && event.properties["Latest Churn Date"] != null;
   })
+  // Group all churn script completes by project (i.e. user)
   .groupByUser(function(state, events) {
     state = state || {
       'latest_churn_date':0, 
@@ -29,27 +31,35 @@ function main() {
       'event_lst': {} 
     };
     if(events.length > 0){
-      // For all script complete events, find the latest churn date 
+      // For all script complete events, find and update the latest churn date 
       for(var i = 0; i < events.length; i++){
         state.churn_dates.push(new Date(events[i].properties['Latest Churn Date']).getTime()/1000);
+        
+        // If current event's churn date is greater than the latest churn date, replace 
         if(new Date(events[i].properties['Latest Churn Date']).getTime()/1000 > state.latest_churn_date){
           state.latest_churn_date = new Date(events[i].properties['Latest Churn Date']).getTime()/1000;
         }
+        
+        // Add event data to key/value pair list; key == event timestamp, value == event props 
         var ourEvent = events[i];
         state.event_lst[events[i].time/1000] = JSON.stringify(events[i].properties);
       }
       // For all events, find the project analysis that most closely matches to recent churn 
      for(key in state.event_lst) {
+       
         // If the difference between latest churn date and event timestamp is within 4 days...
         if(Math.abs(state.latest_churn_date - key) < 345600){
+          // If the churn time for script complete hasn't been set, set it! 
           if(state.script_complete_time_churn == null){
             state.script_complete_time_churn = key;
-            state.time_difference = Math.abs(state.latest_churn_date - key);
+            state.time_difference = state.latest_churn_date - key;
           }
+          // If the churn time for script complete has been set, check to see if this timestamp is 
+          // closer to the time of churn. If yes, reset it!
           else{
             if(Math.abs(state.latest_churn_date - key) < state.script_complete_time_churn){
               state.script_complete_time_churn = key;
-              state.time_difference = Math.abs(state.latest_churn_date - key);
+              state.time_difference = state.latest_churn_date - key;
             }
           }
         }
@@ -57,11 +67,13 @@ function main() {
     }
     return state;
   })
+  // Filter out all events where the churn time differs too drastically from the event time
   .filter(function(item){
     return item.value.script_complete_time_churn != null;
   })
+  // Transform everything to an output that looks nice 
   .map(function(item) {
-    // TODO: want to calculate time to churn here
+    // TODO: want to calculate time to churn here - need to add latest purchase date
     returnItem = {};
     returnItem["Project ID"] =item.key[0];
     returnItem.time_difference = item.value.time_difference;
