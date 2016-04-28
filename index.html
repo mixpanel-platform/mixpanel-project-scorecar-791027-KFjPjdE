@@ -119,7 +119,12 @@ function processData(results){
     if(results[i]['Project Properties']['Event Count (total)'] > 30){
       totalUsingEvents++;
       avgValues['avg_event_similarity'] += results[i]['Project Properties']['Avg Event Similarity'];
-      avgValues['date_prop_count'] += results[i]['Project Properties']['Avg Event Similarity'];
+      avgValues['date_prop_count'] += results[i]['Project Properties']['Date Prop Count'];
+      avgValues['unique_event_count'] += results[i]['Project Properties']['Event Count (unique)'];
+      avgValues['int_super_props'] += results[i]['Project Properties']['Int Super Prop Count'];
+      avgValues['unique_event_props'] += results[i]['Project Properties']['Prop Count (unique)'];
+      avgValues['prop_to_event_ratio'] += results[i]['Project Properties']['Prop/Event Ratio'];
+      avgValues['super_prop_count'] += results[i]['Project Properties']['Date Prop Count'];
     }
     // Using people - update people stat counts
     if(results[i]['Project Properties']['People Prof Count'] > 30){
