@@ -117,11 +117,13 @@ function processData(results){
   for(var i = 0; i < results.length; i++){
     // Using events - update event stat counts
     if(results[i]['Project Properties']['Event Count (total)'] > 30){
-      
+      totalUsingEvents++;
+      avgValues['avg_event_similarity'] += results[i]['Project Properties']['Avg Event Similarity'];
+      // TODO: left off here
     }
     // Using people - update people stat counts
     if(results[i]['Project Properties']['People Prof Count'] > 30){
-      
+      totalUsingPeople++;
     }
   }
 }
