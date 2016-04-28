@@ -115,7 +115,14 @@ function processData(results){
     'segment_io_users':0
   }
   for(var i = 0; i < results.length; i++){
-    /*TODO: use total event count and total profile count to determine whether or not they're using ppl/events */
+    // Using events - update event stat counts
+    if(results[i]['Project Properties']['Event Count (total)'] > 30){
+      
+    }
+    // Using people - update people stat counts
+    if(results[i]['Project Properties']['People Prof Count'] > 30){
+      
+    }
   }
 }
 /*
