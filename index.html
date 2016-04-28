@@ -96,9 +96,32 @@ runQuery();
 
 
 function processData(results){
-  
+  var totalChurns = results.length;
+  var totalUsingEvents = 0; // need to calculate
+  var totalUsingPeople = 0; // need to calculate
+  var avgValues = {
+    'active_campaign_count':0,
+    'avg_event_similarity':0,
+    'date_prop_count':0,
+    'duplicate_to_prof_ratio':0,
+    'unique_event_count':0,
+    'identity_mgmt_issues':0,
+    'int_super_props':0,
+    'unique_people_props':0,
+    'unique_event_props': 0,
+    'prop_to_event_ratio':0,
+    'prop_to_prof_ratio':0,
+    'super_prop_count':0,
+    'segment_io_users':0
+  }
+  for(var i = 0; i < results.length; i++){
+    /*TODO: use total event count and total profile count to determine whether or not they're using ppl/events */
+  }
 }
-
+/*
+Long term to-dos:
+- segment filters - see churn stats and baselines by company segments 
+*/
 </script>
 
 
