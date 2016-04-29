@@ -125,6 +125,9 @@ function processData(results){
       avgValues['unique_event_props'] += results[i]['Project Properties']['Prop Count (unique)'];
       avgValues['prop_to_event_ratio'] += results[i]['Project Properties']['Prop/Event Ratio'];
       avgValues['super_prop_count'] += results[i]['Project Properties']['Date Prop Count'];
+      if(results[i]['Using Segment']){
+        
+      }
     }
     // Using people - update people stat counts
     if(results[i]['Project Properties']['People Prof Count'] > 30){
@@ -134,7 +137,9 @@ function processData(results){
       if (results[i]['Project Properties']['Identity MGMT Issue'] == "YES") {
         avgValues['identity_mgmt_issues'] += 1;
       }
-      avgValues['unique_people_props'] += results[i]['Project Properties']['Avg Event Similarity'];
+      avgValues['unique_people_props'] += results[i]['Project Properties']['People Prop Count (unique)'];
+      avgValues['prop_to_prof_ratio'] += results[i]['Project Properties']['Prop/Profile Ratio'];
+      avgValues['avg_event_similarity'] += results[i]['Project Properties']['Avg Event Similarity'];
     }
   }
 }
