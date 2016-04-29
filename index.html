@@ -89,7 +89,8 @@ function main() {
 var script = $('#cq').html();
 function runQuery() {
   MP.api.jql(script).done(function(results) {
-    console.log(results);
+    //console.log(results);
+    processData(results);
   });
 }
 runQuery();
