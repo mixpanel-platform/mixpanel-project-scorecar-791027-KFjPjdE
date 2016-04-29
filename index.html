@@ -153,10 +153,20 @@ function processData(results){
     }
   }
   
-  for(value in avgValues){
-    avgValues[value]  = 
+  for(type in avgValues){
+    if (type == 'ppl_vals'){
+      for(value in avgValues[type]){
+        avgValues[type][value] = avgValues[type][value]/totalUsingPeople;
+      }
+    } 
+    else{
+      for(value in avgValues[type]){
+        avgValues[type][value] = avgValues[type][value]/totalUsingEvents;
+      }
+    }
   }
   
+  console.log(avgValues);
 }
 /*
 Long term to-dos:
