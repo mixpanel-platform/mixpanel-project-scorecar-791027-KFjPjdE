@@ -112,7 +112,8 @@ function processData(results){
     'prop_to_event_ratio':0,
     'prop_to_prof_ratio':0,
     'super_prop_count':0,
-    'segment_io_users':0
+    'segment_io_users':0,
+    'predict_users':0
   }
   for(var i = 0; i < results.length; i++){
     // Using events - update event stat counts
@@ -126,7 +127,7 @@ function processData(results){
       avgValues['prop_to_event_ratio'] += results[i]['Project Properties']['Prop/Event Ratio'];
       avgValues['super_prop_count'] += results[i]['Project Properties']['Date Prop Count'];
       if(results[i]['Using Segment']){
-        
+        avgValues['segment_io_users']++;
       }
     }
     // Using people - update people stat counts
@@ -135,13 +136,21 @@ function processData(results){
       avgValues['active_campaign_count'] += results[i]['Project Properties']['Active Campaign Count'];
       avgValues['duplicate_to_prof_ratio'] += results[i]['Project Properties']['Duplicates/Profile Ratio'];
       if (results[i]['Project Properties']['Identity MGMT Issue'] == "YES") {
-        avgValues['identity_mgmt_issues'] += 1;
+        avgValues['identity_mgmt_issues']++;
       }
       avgValues['unique_people_props'] += results[i]['Project Properties']['People Prop Count (unique)'];
       avgValues['prop_to_prof_ratio'] += results[i]['Project Properties']['Prop/Profile Ratio'];
       avgValues['avg_event_similarity'] += results[i]['Project Properties']['Avg Event Similarity'];
+      if(results[i]['Using Predict']){
+        avgValues['predict_users']++;
+      }
     }
   }
+  
+  for(value in avgValues){
+    console.log(value);
+  }
+  
 }
 /*
 Long term to-dos:
