@@ -129,6 +129,12 @@ function processData(results){
     // Using people - update people stat counts
     if(results[i]['Project Properties']['People Prof Count'] > 30){
       totalUsingPeople++;
+      avgValues['active_campaign_count'] += results[i]['Project Properties']['Active Campaign Count'];
+      avgValues['duplicate_to_prof_ratio'] += results[i]['Project Properties']['Duplicates/Profile Ratio'];
+      if (results[i]['Project Properties']['Identity MGMT Issue'] == "YES") {
+        avgValues['identity_mgmt_issues'] += 1;
+      }
+      avgValues['unique_people_props'] += results[i]['Project Properties']['Avg Event Similarity'];
     }
   }
 }
