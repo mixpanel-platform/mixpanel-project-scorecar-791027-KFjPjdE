@@ -102,28 +102,25 @@ function processData(results){
   var totalUsingPeople = 0; // need to calculate
   var avgValues = {
     'ppl_vals': {
-      
+      'active_campaign_count':0,
+      'duplicate_to_prof_ratio':0,
+      'identity_mgmt_issues':0,
+      'unique_people_props':0,
+      'prop_to_prof_ratio':0,
+      'predict_users':0
     },
     'event_vals': {
-      
+      'avg_event_similarity':0,
+      'date_prop_count':0,
+      'unique_event_count':0,
+      'int_super_props':0,
+      'unique_event_props': 0,
+      'prop_to_event_ratio':0,
+      'super_prop_count':0,
+      'segment_io_users':0,
     }
   }
-  var avgValues = {
-    'active_campaign_count':0,
-    'avg_event_similarity':0,
-    'date_prop_count':0,
-    'duplicate_to_prof_ratio':0,
-    'unique_event_count':0,
-    'identity_mgmt_issues':0,
-    'int_super_props':0,
-    'unique_people_props':0,
-    'unique_event_props': 0,
-    'prop_to_event_ratio':0,
-    'prop_to_prof_ratio':0,
-    'super_prop_count':0,
-    'segment_io_users':0,
-    'predict_users':0
-  }
+
   for(var i = 0; i < results.length; i++){
     // Using events - update event stat counts
     if(results[i]['Project Properties']['Event Count (total)'] > 30){
