@@ -11,167 +11,40 @@
     
     
 <script type="text/cq" id="cq">
-/*Notes: if time difference is negative, the event fired after churn, else before churn */
-/* Custom query for churn data near churn date TODO: error check this */
 function main() {
   return Events({
     from_date: '2016-02-01',
     to_date:   '2016-04-19'
   })
   // Filter to "Script Complete" events that have a lastest churn date
-  .filter(function(event){
-    return event.name == 'Script Complete' && event.properties["Latest Churn Date"] != null;
-  })
+  .filter(event => event.name == 'Script Complete' && event.properties["Latest Churn Date"])
+  // Return only events that are timestamped BEFORE churn took place
+  .filter(event => event.time < new Date(event.properties['Latest Churn Date']).getTime())
   // Group all churn script completes by project (i.e. user)
   .groupByUser(function(state, events) {
     state = state || {
-      'latest_churn_date':0, 
-      'script_complete_time_churn': null,
-      'time_difference': 0,
-      'churn_dates':[],
-      'event_lst': {} 
+      event_props : null,
     };
-    if(events.length > 0){
-      // For all script complete events, find and update the latest churn date 
-      for(var i = 0; i < events.length; i++){
-        state.churn_dates.push(new Date(events[i].properties['Latest Churn Date']).getTime()/1000);
-        
-        // If current event's churn date is greater than the latest churn date, replace 
-        if(new Date(events[i].properties['Latest Churn Date']).getTime()/1000 > state.latest_churn_date){
-          state.latest_churn_date = new Date(events[i].properties['Latest Churn Date']).getTime()/1000;
-        }
-        
-        // Add event data to key/value pair list; key == event timestamp, value == event props 
-        var ourEvent = events[i];
-        state.event_lst[events[i].time/1000] = JSON.stringify(events[i].properties);
-      }
-      // For all events, find the project analysis that most closely matches to recent churn 
-     for(key in state.event_lst) {
-       
-        // If the difference between latest churn date and event timestamp is within 4 days...
-        if(Math.abs(state.latest_churn_date - key) < 345600){
-          // If the churn time for script complete hasn't been set, set it! 
-          if(state.script_complete_time_churn == null){
-            state.script_complete_time_churn = key;
-            state.time_difference = state.latest_churn_date - key;
-          }
-          // If the churn time for script complete has been set, check to see if this timestamp is 
-          // closer to the time of churn. If yes, reset it!
-          else{
-            if(Math.abs(state.latest_churn_date - key) < state.script_complete_time_churn){
-              state.script_complete_time_churn = key;
-              state.time_difference = state.latest_churn_date - key;
-            }
-          }
-        }
-      }
-    }
+    _.each(events, function(event){
+      state.event_props = event;
+    });
     return state;
-  })
-  // Filter out all events where the churn time differs too drastically from the event time
-  .filter(function(item){
-    return item.value.script_complete_time_churn != null;
-  })
-  // Transform everything to an output that looks nice 
-  .map(function(item) {
-    // TODO: want to calculate time to churn here - need to add latest purchase date
-    returnItem = {};
-    returnItem["Project ID"] =item.key[0];
-    returnItem.time_difference = item.value.time_difference;
-    // Add all script complete event properties at time of churn (within 4 days )
-    returnItem["Project Properties"] = JSON.parse(item.value.event_lst[item.value.script_complete_time_churn]);
-    return returnItem;
   });
+  //.filter(element => element.value.last_event);
 }
+
+
 </script>
 
 <script>
 var script = $('#cq').html();
 function runQuery() {
   MP.api.jql(script).done(function(results) {
-    //console.log(results);
-    processData(results);
+    console.log(results);
   });
 }
 runQuery();
 
-
-function processData(results){
-  var totalChurns = results.length;
-  var totalUsingEvents = 0; // need to calculate
-  var totalUsingPeople = 0; // need to calculate
-  var avgValues = {
-    'ppl_vals': {
-      'active_campaign_count':0,
-      'duplicate_to_prof_ratio':0,
-      'identity_mgmt_issues':0,
-      'unique_people_props':0,
-      'prop_to_prof_ratio':0,
-      'predict_users':0
-    },
-    'event_vals': {
-      'avg_event_similarity':0,
-      'date_prop_count':0,
-      'unique_event_count':0,
-      'int_super_props':0,
-      'unique_event_props': 0,
-      'prop_to_event_ratio':0,
-      'super_prop_count':0,
-      'segment_io_users':0,
-    }
-  }
-
-  for(var i = 0; i < results.length; i++){
-    // Using events - update event stat counts
-    if(results[i]['Project Properties']['Event Count (total)'] > 30){
-      totalUsingEvents++;
-      avgValues['event_vals']['avg_event_similarity'] += results[i]['Project Properties']['Avg Event Similarity'];
-      avgValues['event_vals']['date_prop_count'] += results[i]['Project Properties']['Date Prop Count'];
-      avgValues['event_vals']['unique_event_count'] += results[i]['Project Properties']['Event Count (unique)'];
-      avgValues['event_vals']['int_super_props'] += results[i]['Project Properties']['Int Super Prop Count'];
-      avgValues['event_vals']['unique_event_props'] += results[i]['Project Properties']['Prop Count (unique)'];
-      avgValues['event_vals']['prop_to_event_ratio'] += results[i]['Project Properties']['Prop/Event Ratio'];
-      avgValues['event_vals']['super_prop_count'] += results[i]['Project Properties']['Date Prop Count'];
-      if(results[i]['Using Segment']){
-        avgValues['event_vals']['segment_io_users']++;
-      }
-    }
-    // Using people - update people stat counts
-    if(results[i]['Project Properties']['People Prof Count'] > 30){
-      totalUsingPeople++;
-      avgValues['ppl_vals']['active_campaign_count'] += results[i]['Project Properties']['Active Campaign Count'];
-      avgValues['ppl_vals']['duplicate_to_prof_ratio'] += results[i]['Project Properties']['Duplicates/Profile Ratio'];
-      if (results[i]['Project Properties']['Identity MGMT Issue'] == "YES") {
-        avgValues['ppl_vals']['identity_mgmt_issues']++;
-      }
-      avgValues['ppl_vals']['unique_people_props'] += results[i]['Project Properties']['People Prop Count (unique)'];
-      avgValues['ppl_vals']['prop_to_prof_ratio'] += results[i]['Project Properties']['Prop/Profile Ratio'];
-      //avgValues['ppl_vals']['avg_event_similarity'] += results[i]['Project Properties']['Avg Event Similarity'];
-      if(results[i]['Using Predict']){
-        avgValues['ppl_vals']['predict_users']++;
-      }
-    }
-  }
-  
-  for(type in avgValues){
-    if (type == 'ppl_vals'){
-      for(value in avgValues[type]){
-        avgValues[type][value] = avgValues[type][value]/totalUsingPeople;
-      }
-    } 
-    else{
-      for(value in avgValues[type]){
-        avgValues[type][value] = avgValues[type][value]/totalUsingEvents;
-      }
-    }
-  }
-  
-  console.log(avgValues);
-}
-/*
-Long term to-dos:
-- segment filters - see churn stats and baselines by company segments 
-*/
 </script>
 
 
